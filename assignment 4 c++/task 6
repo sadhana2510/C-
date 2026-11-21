@@ -1,0 +1,156 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Vehicle {
+protected:
+    string regNo;
+    double dailyRate;
+    bool rented;
+
+public:
+    Vehicle(string r, double rate) {
+        regNo = r;
+        dailyRate = rate;
+        rented = false;
+    }
+
+    virtual double charge(int days) = 0;
+
+    virtual void display() {
+        cout << "Registration: " << regNo << endl;
+        cout << "Daily Rate: " << dailyRate << endl;
+        cout << "Status: " << (rented ? "Rented" : "Available") << endl;
+    }
+
+    void rent() {
+        if (!rented) {
+            rented = true;
+            cout << regNo << " rented successfully\n";
+        } else {
+            cout << regNo << " is already rented\n";
+        }
+    }
+
+    void returnVehicle(int days, int lateDays) {
+        if (rented) {
+            double amount = charge(days) + lateDays * 200;
+            rented = false;
+
+            cout << regNo << " returned successfully\n";
+            cout << "Rental Charge: " << amount << endl;
+        } else {
+            cout << "Vehicle was not rented\n";
+        }
+    }
+
+    virtual ~Vehicle() {}
+};
+
+class Bicycle : public Vehicle {
+public:
+    Bicycle(string r, double rate) : Vehicle(r, rate) {}
+
+    double charge(int days) override {
+        return dailyRate * days;
+    }
+};
+
+class TwoWheeler : public Vehicle {
+    double fuelLevel;
+    string serviceDate;
+
+public:
+    TwoWheeler(string r, double rate, double fuel, string date)
+        : Vehicle(r, rate) {
+        fuelLevel = fuel;
+        serviceDate = date;
+    }
+
+    double charge(int days) override {
+        return dailyRate * days;
+    }
+};
+
+class Car : public Vehicle {
+protected:
+    int seats;
+
+public:
+    Car(string r, double rate, int s)
+        : Vehicle(r, rate) {
+        seats = s;
+    }
+
+    double charge(int days) override {
+        return dailyRate * days;
+    }
+
+    void display() override {
+        Vehicle::display();
+        cout << "Seating Capacity: " << seats << endl;
+    }
+};
+
+class ElectricCar : public Car {
+    double batteryCapacity;
+
+public:
+    ElectricCar(string r, double rate, int s, double battery)
+        : Car(r, rate, s) {
+        batteryCapacity = battery;
+    }
+
+    double charge(int days) override {
+        return dailyRate * days + batteryCapacity * 5;
+    }
+};
+
+class ElectricBus : public Vehicle {
+    int seats;
+    double batteryCapacity;
+
+public:
+    ElectricBus(string r, double rate, int s, double battery)
+        : Vehicle(r, rate) {
+        seats = s;
+        batteryCapacity = battery;
+    }
+
+    double charge(int days) override {
+        return dailyRate * days + batteryCapacity * 5;
+    }
+};
+
+int main() {
+
+    Bicycle b("BIKE101", 100);
+    TwoWheeler t("TWO201", 200, 80, "2026-12-01");
+    Car c("CAR301", 1000, 5);
+    ElectricCar e("EV401", 1500, 5, 60);
+    ElectricBus bus("BUS501", 3000, 40, 150);
+
+    Vehicle* fleet[] = {&b, &t, &c, &e, &bus};
+
+    cout << "VEHICLE RENTAL SYSTEM\n\n";
+
+    for (Vehicle* v : fleet) {
+        v->display();
+        cout << endl;
+    }
+
+    cout << "\nRENTING VEHICLES\n";
+
+    for (Vehicle* v : fleet) {
+        v->rent();
+    }
+
+    cout << "\nRETURNING VEHICLES\n";
+
+    for (Vehicle* v : fleet) {
+        v->returnVehicle(3, 1);
+        cout << endl;
+    }
+
+    return 0;
+}
